@@ -109,34 +109,27 @@ class CatFileUploader:
         3. Загрузка полученной картинки в папку - по имени <text>.jpg
         4. Получение информации по картинке в json (в том числе там есть информация по размеру файла)
         5. Создание json файла в папке - по имени <text>.json
+        Возвращает True в случае успеха или ошибку
         """
         if folder_path == "":
             folder_path = self._DEFAULT_FOLDER
 
-        try:
-            print("1. Получаем картинку")
-            image = self.cat.get_cat_image(text)
+        print("1. Получаем картинку")
+        image = self.cat.get_cat_image(text)
 
-            print("2. Создаем\проверяем наличие папки")
-            self.disk.create_folder(folder_path)
+        print("2. Создаем\проверяем наличие папки")
+        self.disk.create_folder(folder_path)
 
-            print("3. Загружаем картинку на диск")
-            image_path = f'/{folder_path}/{text}.jpg'
-            self.disk.upload_file(image_path, image)
+        print("3. Загружаем картинку на диск")
+        image_path = f'/{folder_path}/{text}.jpg'
+        self.disk.upload_file(image_path, image)
 
-            print("4. Получаем информацию по картинке")
-            file_info = self.disk.get_file_info(image_path)
+        print("4. Получаем информацию по картинке")
+        file_info = self.disk.get_file_info(image_path)
 
-            print("5. Загружаем json с метаданными")
-            metadata_path = f'/{folder_path}/{text}.json'
-            self.disk.upload_file(metadata_path, file_info)
-
-        except Exception as e:
-            print(f'Ошибка исполнения {e}')
-            return
-
-        print("Успешно завершено!")
-        return
+        print("5. Загружаем json с метаданными")
+        metadata_path = f'/{folder_path}/{text}.json'
+        self.disk.upload_file(metadata_path, file_info)
 
 def main():
     print("Введите текст для отображения на фото: ", end='')
@@ -151,11 +144,15 @@ def main():
         print("Токен не может быть пустым")
         return
 
-
     disk_client = YandexDiskClient(token)
     cat_client = CatApiClient()
     uploader = CatFileUploader(disk_client, cat_client)
-    uploader.upload(text)
+
+    try:
+        uploader.upload(text)
+        print("Успешно завершено!")
+    except Exception as e:
+        print(f"Ошибка исполнения: {e}")
 
 if __name__ == "__main__":
     main()
